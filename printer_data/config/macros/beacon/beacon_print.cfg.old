@@ -8,7 +8,6 @@ gcode:
     {% set target_bed = params.BED_TEMP|int %}
     {% set target_extruder = params.EXTRUDER_TEMP|int %}
     {% set target_chamber = params.CHAMBER_TEMP|default("40")|int %}
-    {% set filament_type = params.FILAMENT|default("PLA")|string|upper %}
 
     # Collecting variables
     {% set x_wait = printer.toolhead.axis_maximum.x|float / 2 %}
@@ -26,14 +25,7 @@ gcode:
     {% set adaptive_meshing = printer["gcode_macro BEACON_VARS"].adaptive_mesh|default(false) %}
 
     SET_FAN_SPEED FAN=drivers_fan SPEED=1.0
-
-    # Logic for Exhaust fan based on filament type
-    {% if filament_type == "PETG" %}
-        SET_FAN_SPEED FAN=exhaust_fan SPEED=1.0
-    {% else %}
-        # Default for PLA and others
-        SET_FAN_SPEED FAN=exhaust_fan SPEED=0.5
-    {% endif %}
+    SET_FAN_SPEED FAN=exhaust_fan SPEED=0.5
 
     SET_DISPLAY_TEXT MSG="Hotend: {beacon_contact_calibration_temp}c"                           # Displays info
     M109 S{beacon_contact_calibration_temp}                                                     # Heats up the nozzle to contact temps
@@ -153,13 +145,6 @@ gcode:
     {% endif %}
 
     SET_GCODE_OFFSET Z=0.04
-    # Logic for additional z offset based on material type
-    {% if filament_type == "PETG" %}
-	SET_GCODE_OFFSET Z_ADJUST=0.08
-    {% else %}
-        # Default for PLA and others
-	SET_GCODE_OFFSET Z_ADJUST=0.00
-    {% endif %}
 
     # Gets ready to print by doing a purge line
     SET_DISPLAY_TEXT MSG="Printer goes brr"                                                     # Displays info
